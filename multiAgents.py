@@ -51,6 +51,9 @@ class ReflexAgent(Agent):
 
         return legalMoves[chosenIndex]
 
+    def manhattanDistance(xy1, xy2):
+        return abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
+
     def evaluationFunction(self, currentGameState, action):
         """
         Design a better evaluation function here.
@@ -73,8 +76,35 @@ class ReflexAgent(Agent):
         newGhostStates = successorGameState.getGhostStates()
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
-        "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        scaredTotal = 0
+        for scaredTime in newScaredTimes:
+            scaredTotal += scaredTime
+
+        ghostTotal = 0
+        for ghostState in newGhostStates:
+            #print "Ghost:", ghostState
+            ghostPos = ghostState.configuration.getPosition()
+            dist = manhattanDistance(newPos, ghostPos)
+            if dist > 0:
+                ghostTotal -= 1 / (1.0 * dist)
+            else:
+                ghostTotal += -100000
+
+        pellets = newFood.asList()
+        minDistToFood = 10000000
+        if len(pellets) > 0:
+            for pellet in pellets:
+                dist = manhattanDistance(newPos, pellet)
+                if dist < minDistToFood:
+                    minDistToFood = dist
+        else:
+            minDistToFood = 0
+
+        pelletScore = 0
+        if minDistToFood > 0:
+            pelletScore = 1 / (1.0 * minDistToFood)
+
+        return successorGameState.getScore() + scaredTotal + ghostTotal + pelletScore
 
 def scoreEvaluationFunction(currentGameState):
     """
