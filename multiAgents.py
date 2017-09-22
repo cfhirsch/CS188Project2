@@ -140,6 +140,54 @@ class MinimaxAgent(MultiAgentSearchAgent):
     """
       Your minimax agent (question 2)
     """
+    def minimax(self, gameState):
+      moves = gameState.getLegalActions(0)
+      best_move = moves[0]
+      best_score = float('-inf')
+      for move in moves:
+        clone = gameState.generateSuccessor(0, move)
+        numAgents = clone.getNumAgents()
+        score = self.min_play(clone, 0, 1, numAgents)
+        if score > best_score:
+          best_move = move
+          best_score = score
+      return best_move
+
+    def min_play(self, gameState, d, index, numAgents):
+      if gameState.isWin() or gameState.isLose():
+          return self.evaluationFunction(gameState)
+      maxDepth = (d == self.depth - 1) and (index == numAgents - 1)
+      moves = gameState.getLegalActions(index)
+      best_score = float('inf')
+      for move in moves:
+          clone = gameState.generateSuccessor(index, move)
+          print "NumAgents = ", clone.getNumAgents()
+          if maxDepth:
+              score = self.evaluationFunction(clone)
+          elif index < numAgents - 1:
+              score = self.min_play(clone, d, index + 1, numAgents)
+          else:
+              score = self.max_play(clone, d + 1)
+              
+          if score < best_score:
+              best_move = move
+              best_score = score
+
+      return best_score
+
+    def max_play(self, gameState, d):
+        if gameState.isWin() or gameState.isLose():
+          return self.evaluationFunction(gameState)
+        moves = gameState.getLegalActions(0)
+        best_score = float('-inf')
+        for move in moves:
+            clone = gameState.generateSuccessor(0, move)
+            numAgents = gameState.getNumAgents()
+            score = self.min_play(clone, d, 1, numAgents)
+            if score > best_score:
+                best_move = move
+                best_score = score
+        return best_score
 
     def getAction(self, gameState):
         """
@@ -158,9 +206,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
           gameState.getNumAgents():
             Returns the total number of agents in the game
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
-
+        return self.minimax(gameState) 
+ 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
       Your minimax agent with alpha-beta pruning (question 3)
