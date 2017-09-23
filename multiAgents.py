@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # multiAgents.py
 # --------------
 # Licensing Information:  You are free to use or extend these projects for
@@ -212,13 +213,55 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     """
       Your minimax agent with alpha-beta pruning (question 3)
     """
+    """
+    """
+    def alphaBeta(self, gameState, depth, alpha, beta, playerIndex):
+        if (depth == 0) or gameState.isWin() or gameState.isLose():
+            return self.evaluationFunction(gameState)
+
+        numAgents = gameState.getNumAgents()
+        moves = gameState.getLegalActions(playerIndex)
+        bestMove = moves[0]
+        if playerIndex == 0:
+            v = float('-inf')
+            for move in moves:
+                child = gameState.generateSuccessor(playerIndex, move)
+                result = self.alphaBeta(child, depth, alpha, beta, 1)
+                if result > v:
+                    v = result
+                    bestMove = move
+
+                if v > beta:
+                    return bestMove
+                
+                alpha = max(alpha, v)
+                
+            return bestMove
+        else:
+            v = float('inf')
+            for move in moves:
+                child = gameState.generateSuccessor(playerIndex, move)
+                newDepth = depth
+                nextAgent = (playerIndex + 1) % numAgents
+                if nextAgent == 0:
+                    newDepth -= 1
+                result = self.alphaBeta(child, newDepth, alpha, beta, nextAgent)
+                if result < v:
+                    v = result
+                    bestMove = move
+
+                if v < alpha:
+                    return bestMove
+                
+                beta = min(beta, v)
+                
+            return bestMove
 
     def getAction(self, gameState):
         """
           Returns the minimax action using self.depth and self.evaluationFunction
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.alphaBeta(gameState, self.depth, float('-inf'), float('inf'), 0)
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
